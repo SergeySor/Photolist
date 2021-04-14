@@ -11,7 +11,7 @@ import Alamofire
 class Requester {
     private let allPhotos = "https://api.flickr.com/services/rest/?method=flickr.photos.getRecent&api_key=da9d38d3dee82ec8dda8bb0763bf5d9c&format=json&nojsoncallback=1"
     
-    func getNewPhotos(completion: @escaping (Photos?)->()){
+    func getNewPhotos(completion: @escaping (Photos?)->()) {
         
         let request = AF.request(allPhotos)
         
@@ -23,5 +23,12 @@ class Requester {
                 print(photo ?? "value can't be deserilized")
             }
         }
+    }
+    
+    func getCurrentPhoto(photo: Photo) -> DataRequest {
+        
+        let request = AF.request("https://farm\(photo.farm).staticflickr.com/\(photo.server)/\(photo.id)_\(photo.secret).jpg")
+        
+        return request
     }
 }

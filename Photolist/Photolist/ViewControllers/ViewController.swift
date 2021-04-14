@@ -8,7 +8,7 @@
 import UIKit
 import Alamofire
 
-class ViewController: UIViewController, UICollectionViewDelegate, UICollectionViewDataSource {
+class ViewController: UIViewController {
     
     private let identifier = "cell"
     private var requester = Requester()
@@ -42,19 +42,24 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         photos = photo
         updateCollectionView()
     }
+}
 
-    //MARK: UICollectionViewDelegate
+extension ViewController: UICollectionViewDataSource {
     
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         20
     }
-    
+}
+
+extension ViewController: UICollectionViewDelegateFlowLayout {
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: identifier, for: indexPath) as! CustomCell
         if let photos = photos {
             let currentPhoto = photos.photos.photo[indexPath.item]
-            let request = AF.request("https://farm\(currentPhoto.farm).staticflickr.com/\(currentPhoto.server)/\(currentPhoto.id)_\(currentPhoto.secret).jpg")
+            
+            let request = requester.getCurrentPhoto(photo: currentPhoto)
+            
             request.responseData { (data) in
                 if let data = data.data {
                     let image = UIImage(data: data)
@@ -66,6 +71,31 @@ class ViewController: UIViewController, UICollectionViewDelegate, UICollectionVi
         
         return cell
     }
-
+    
+    func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
+        
+        let cell = collectionView.cellForItem(at: indexPath) as! CustomCell
+        
+        if let image = cell.imageView.image {
+            let photoViewController = PhotoViewController()
+            photoViewController.modalPresentationStyle = .overCurrentContext
+            photoViewController.setPhoto(photo: image)
+            present(photoViewController, animated: true, completion: nil)
+        }
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, sizeForItemAt indexPath: IndexPath) -> CGSize {
+        
+        let size = collectionView.frame.width * 0.35
+        
+        return CGSize(width: size, height: size)
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, layout collectionViewLayout: UICollectionViewLayout, insetForSectionAt section: Int) -> UIEdgeInsets {
+        
+        let interval = collectionView.frame.width * 0.1
+        
+        return UIEdgeInsets(top: 0, left: interval, bottom: 0, right: interval)
+    }
+    
 }
-
